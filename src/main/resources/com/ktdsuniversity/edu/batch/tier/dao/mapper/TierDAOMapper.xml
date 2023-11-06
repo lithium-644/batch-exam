@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ktdsuniversity.edu.batch.dao.TierDAO">
+	
+
+	<resultMap type="com.ktdsuniversity.edu.batch.vo.GeneralMemberVO"
+			   id="GeneralMemberVOMap"
+			   autoMapping="true">
+		<id column="GENERAL_MEMBER_EMAIL" property="GeneralMemberEmail" />
+		<result column="JOB_ID" property="jobId" />
+		<result column="REGION" property="region" />
+		<result column="SELF_INTRO" property="selfIntro" />
+		<result column="GITHUB_URL" property="githubUrl" />
+		<result column="ADDITIONAL_EMAIL" property="additionalEmail" />
+		<result column="BLOG_URL" property="blogUrl" />
+		<result column="TIER_ID" property="tierId" />
+		<result column="TIER_SCORE" property="tierScore" />
+		<result column="TIER_DATE" property="tierDate" />		
+		<result column="NEXT_TIER_ID" property="tierIdTemp" />		
+
+			<association property="tierVO"
+						 javaType="com.ktdsuniversity.edu.batch.vo.TierVO">
+				<id column="TIER_ID" property="tierId" />
+				<result column="TIER_NAME" property="tierName" />		 
+				<result column="TIER_CRITERIA_SCORE" property="tierCriteriaScore" />		 
+				<result column="TIER_IMAGE_URL" property="tierImageUrl" />
+			</association>
+	</resultMap>
+			
+
+
+	<select id="selectAdminTierList"
+	        resultMap="GeneralMemberVOMap">
+		SELECT *
+  		  FROM (SELECT GM.GENERAL_MEMBER_EMAIL
+  		  			 , GM.TIER_ID 
+			 		 , GM.TIER_SCORE
+					 , T.TIER_NAME
+				     , (SELECT TIER_ID 
+  			  	 		  FROM (SELECT *
+			  					  FROM TIER T1
+			  		   			 WHERE T1.TIER_CRITERIA_SCORE <![CDATA[<=]]> GM.TIER_SCORE
+			  		   		 	 ORDER BY TIER_CRITERIA_SCORE DESC) A
+		  	  			 WHERE ROWNUM = 1) NEXT_TIER_ID
+				     , (SELECT TIER_NAME
+			  			  FROM (SELECT *
+					  			  FROM TIER T1
+					  			 WHERE T1.TIER_CRITERIA_SCORE <![CDATA[<=]]> GM.TIER_SCORE
+					  			 ORDER BY TIER_CRITERIA_SCORE DESC) A
+					  	 WHERE ROWNUM = 1) NEXT_TIER_NAME
+		  		 FROM GENERAL_MEMBER GM
+		  		 JOIN TIER T
+		    	   ON GM.TIER_ID = T.TIER_ID) A
+ 		  WHERE A.TIER_ID != A.NEXT_TIER_ID
+	</select>
+	
+	<delete id="deleteAdminTierList">
+		DELETE
+  		  FROM ADMIN_TIER
+	</delete>
+	
+	<insert id="insertAdminTierList"
+			parameterType="com.ktdsuniversity.edu.batch.vo.AdminTierVO">
+		INSERT INTO ADMIN_TIER
+			   (MEMBER_EMAIL
+			  , SCORE
+			  , NOW_TIER
+			  , NEXT_TIER)
+		VALUES (#{memberEmail}
+			  , #{score}
+			  , #{nowTier}
+			  , #{nextTier})			
+	</insert>
+	
+	<select id="countAdminTierList"
+			resultType="_int">
+		SELECT COUNT(1)
+		  FROM ADMIN_TIER
+	</select>
+	
+</mapper>
+
+
+    

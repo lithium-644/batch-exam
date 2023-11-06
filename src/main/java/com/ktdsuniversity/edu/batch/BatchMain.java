@@ -17,8 +17,7 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ktdsuniversity.edu.batch.jobs.TestJob;
-import com.ktdsuniversity.edu.batch.jobs.TestJob2;
+import com.ktdsuniversity.edu.batch.jobs.AdminTierJob;
 
 public class BatchMain {
 
@@ -29,9 +28,10 @@ public class BatchMain {
 		Scheduler scheduler = makeScheduler();
 		
 		if (scheduler != null) {
-			addSchedule(scheduler, TestJob.class, "testJob", "0/5 * * * * ?");
-			addSchedule(scheduler, TestJob2.class, "testJob2", "0/5 * * * * ?");
-			
+            												// 초 분 시 일 월
+//			addSchedule(scheduler, TestJob.class, "testJob", "0/5 * * * * ?");
+//			addSchedule(scheduler, TestJob2.class, "testJob2", "0/30 * * * * ?");
+			addSchedule(scheduler, AdminTierJob.class, "adminTierJob", "0/10 * * * * ?");
 			start(scheduler);
 		}
 	}
